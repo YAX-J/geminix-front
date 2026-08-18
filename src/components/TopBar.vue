@@ -37,9 +37,10 @@
           <div class="drop-item" @click="exportIssues">问题 Excel</div>
         </div>
       </div>
-      <button class="btn btn-ghost" @click="ui.openTagModal()">🏷 标签</button>
-      <button class="btn btn-problem" @click="ui.openIssueModal()">⚠ 记录问题</button>
-      <button class="btn btn-primary" @click="ui.openReportModal()">＋ 记录日报</button>
+      <button v-if="auth.isAdmin" class="btn btn-ghost" @click="ui.openTagModal()">🏷 标签</button>
+      <button v-if="auth.canWrite" class="btn btn-problem" @click="ui.openIssueModal()">⚠ 记录问题</button>
+      <button v-if="auth.canWrite" class="btn btn-primary" @click="ui.openReportModal()">＋ 记录日报</button>
+      <button v-if="auth.isAdmin" class="btn btn-ghost" @click="router.push('/users')">👥 用户</button>
       <div class="user-box">
         <div class="avatar">{{ avatarText }}</div>
         <div class="user-meta">

@@ -20,7 +20,10 @@ export const useAuthStore = defineStore('auth', {
 
   getters: {
     isLoggedIn: (s) => !!s.token,
-    nickname: (s) => s.userInfo?.nickname || s.userInfo?.username || '用户'
+    nickname: (s) => s.userInfo?.nickname || s.userInfo?.username || '用户',
+    role: (s) => s.userInfo?.role || 'READER',
+    isAdmin: (s) => s.userInfo?.role === 'ADMIN',
+    canWrite: (s) => ['ADMIN', 'AUTHOR'].includes(s.userInfo?.role)
   },
 
   actions: {

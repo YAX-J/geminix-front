@@ -38,6 +38,21 @@
           <label>昵称（可选）</label>
           <input v-model.trim="form.nickname" type="text" placeholder="展示用昵称" />
         </div>
+        <div v-if="mode === 'register'" class="field">
+          <label>角色</label>
+          <div class="role-options">
+            <label class="role-opt" :class="{ active: form.role === 'AUTHOR' }">
+              <input v-model="form.role" type="radio" value="AUTHOR" />
+              <span>作者</span>
+              <small>可记录日报与问题</small>
+            </label>
+            <label class="role-opt" :class="{ active: form.role === 'READER' }">
+              <input v-model="form.role" type="radio" value="READER" />
+              <span>读者</span>
+              <small>仅查看</small>
+            </label>
+          </div>
+        </div>
 
         <button class="btn-submit" :disabled="loading">
           {{ loading ? '请稍候…' : mode === 'login' ? '登 录' : '注册并登录' }}
@@ -61,7 +76,7 @@ const auth = useAuthStore()
 
 const mode = ref('login')
 const loading = ref(false)
-const form = reactive({ username: '', password: '', nickname: '' })
+const form = reactive({ username: '', password: '', nickname: '', role: 'AUTHOR' })
 
 async function onSubmit() {
   if (!form.username || !form.password) {
@@ -81,7 +96,8 @@ async function onSubmit() {
       await auth.register({
         username: form.username,
         password: form.password,
-        nickname: form.nickname
+        nickname: form.nickname,
+        role: form.role
       })
       toast('注册成功，已自动登录 ✔')
     }
@@ -243,5 +259,37 @@ async function onSubmit() {
   font-size: 12px;
   color: var(--text-3);
   margin-top: 16px;
+}
+.role-options {
+  display: flex;
+  gap: 10px;
+}
+.role-opt {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.role-opt input {
+  display: none;
+}
+.role-opt span {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+}
+.role-opt small {
+  font-size: 11px;
+  color: var(--text-3);
+}
+.role-opt.active {
+  border-color: var(--primary);
+  background: var(--primary-bg);
+  box-shadow: 0 0 0 3px var(--primary-bg);
 }
 </style>

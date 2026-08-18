@@ -17,6 +17,12 @@ const routes = [
     name: 'login',
     component: () => import('@/views/LoginView.vue'),
     meta: { public: true }
+  },
+  {
+    path: '/users',
+    name: 'users',
+    component: () => import('@/views/UserManageView.vue'),
+    meta: { requiresAuth: true, admin: true }
   }
 ]
 
@@ -25,7 +31,7 @@ const router = createRouter({
   routes
 })
 
-// 全局路由守卫：未登录跳转登录页
+// 全局路由守卫：未登录跳转登录页；/users 仅 ADMIN 可进
 router.beforeEach((to) => {
   const token = localStorage.getItem('worklog_token')
   if (to.meta.public) {
@@ -34,6 +40,17 @@ router.beforeEach((to) => {
   }
   if (!token) {
     return { path: '/login', query: { redirect: to.fullPath } }
+  }
+  if (to.meta.admin) {
+    let user = null
+    try {
+      user = JSON.parse(localStorage.getItem('worklog_user') || 'null')
+    } catch {
+      user = null
+    }
+    if (user?.role !== 'ADMIN') {
+      return { path: '/' }
+    }
   }
   return true
 })
