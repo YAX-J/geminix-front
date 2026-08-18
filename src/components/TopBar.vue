@@ -16,8 +16,38 @@
         v-model="ui.searchKw"
         type="text"
         placeholder="搜索日报或问题，如「缓存击穿」「N+1」「08-10」…"
+        @input="onSearchInput"
+        @focus="onSearchFocus"
       />
       <span class="kbd">Ctrl K</span>
+
+      <div v-if="searchOpen" class="search-drop">
+        <div v-if="searchResults.reports.length" class="sd-group">
+          <div class="sd-label">日报 · {{ searchResults.reports.length }}</div>
+          <div
+            v-for="r in searchResults.reports.slice(0, 5)"
+            :key="'r' + r.id"
+            class="sd-item"
+            @click="goReport(r)"
+          >
+            <span class="sd-ico">📋</span>{{ r.title }}
+          </div>
+        </div>
+        <div v-if="searchResults.issues.length" class="sd-group">
+          <div class="sd-label">问题 · {{ searchResults.issues.length }}</div>
+          <div
+            v-for="i in searchResults.issues.slice(0, 5)"
+            :key="'i' + i.id"
+            class="sd-item"
+            @click="goIssue(i)"
+          >
+            <span class="sd-ico">⚠</span>{{ i.title }}
+          </div>
+        </div>
+        <div v-if="!searchResults.reports.length && !searchResults.issues.length" class="sd-empty">
+          无匹配结果
+        </div>
+      </div>
     </div>
 
     <div class="topbar-actions">
@@ -61,6 +91,7 @@ import { useReportStore } from '@/stores/reports'
 import { useIssueStore } from '@/stores/issues'
 import { exportWeekly, exportMonthly, exportReportsExcel } from '@/api/reports'
 import { exportIssuesExcel } from '@/api/issues'
+import { searchApi } from '@/api/search'
 import { toast } from '@/utils/toast'
 
 const USE_MOCK = import.meta.env.VITE_USE_MOCK !== 'false'
@@ -72,6 +103,9 @@ const reportStore = useReportStore()
 const issueStore = useIssueStore()
 const searchInput = ref(null)
 const exportOpen = ref(false)
+const searchOpen = ref(false)
+const searchResults = ref({ reports: [], issues: [] })
+let searchTimer = null
 
 const avatarText = computed(() => (auth.nickname || '用').slice(0, 1))
 
@@ -184,16 +218,66 @@ function onLogout() {
   router.replace('/login')
 }
 
+/* ---------- 全局搜索（跨日报+问题联合检索） ---------- */
+function onSearchInput() {
+  clearTimeout(searchTimer)
+  const kw = ui.searchKw.trim()
+  if (!kw) {
+    searchResults.value = { reports: [], issues: [] }
+    searchOpen.value = false
+    return
+  }
+  searchTimer = setTimeout(async () => {
+    if (USE_MOCK) {
+      const k = kw.toLowerCase()
+      const rs = reportStore.items.filter((r) =>
+        `${r.title} ${r.date} ${(r.tasks || []).join(' ')} ${(r.tags || []).join(' ')}`.toLowerCase().includes(k)
+      )
+      const is = issueStore.items.filter((i) =>
+        `${i.title} ${i.desc} ${i.solution || ''} ${i.tag || ''}`.toLowerCase().includes(k)
+      )
+      searchResults.value = { reports: rs.slice(0, 5), issues: is.slice(0, 5) }
+      searchOpen.value = true
+      return
+    }
+    try {
+      const data = await searchApi(kw)
+      searchResults.value = { reports: data.reports || [], issues: data.issues || [] }
+      searchOpen.value = true
+    } catch {
+      searchOpen.value = false
+    }
+  }, 300)
+}
+
+function onSearchFocus() {
+  if (searchResults.value.reports.length || searchResults.value.issues.length) searchOpen.value = true
+}
+
+function goReport(r) {
+  searchOpen.value = false
+  router.push({ path: '/', query: { date: r.reportDate || r.date } })
+}
+
+function goIssue(i) {
+  searchOpen.value = false
+  router.push({ path: '/issues', query: { focus: i.id } })
+}
+
 function onKeydown(e) {
   if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
     e.preventDefault()
     searchInput.value?.focus()
   }
-  if (e.key === 'Escape') exportOpen.value = false
+  if (e.key === 'Escape') {
+    exportOpen.value = false
+    searchOpen.value = false
+  }
 }
 
 function onDocClick(e) {
   if (!e.target.closest('.export-drop')) exportOpen.value = false
+  if (!e.target.closest('.search-box')) searchOpen.value = false
 }
 
 onMounted(() => {
@@ -263,6 +347,7 @@ onBeforeUnmount(() => {
   border-radius: 10px;
   padding: 8px 14px;
   transition: all 0.2s;
+  position: relative;
 }
 .search-box:focus-within {
   border-color: var(--primary);
@@ -291,6 +376,58 @@ onBeforeUnmount(() => {
   border-radius: 5px;
   padding: 1px 6px;
   flex-shrink: 0;
+}
+.search-drop {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.16);
+  padding: 6px;
+  z-index: 70;
+  max-height: 360px;
+  overflow-y: auto;
+  animation: rise 0.16s ease both;
+}
+.sd-group + .sd-group {
+  margin-top: 4px;
+  border-top: 1px solid var(--border);
+  padding-top: 4px;
+}
+.sd-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-3);
+  padding: 4px 8px 2px;
+}
+.sd-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  color: var(--text);
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sd-item:hover {
+  background: var(--primary-bg);
+  color: var(--primary);
+}
+.sd-ico {
+  flex-shrink: 0;
+}
+.sd-empty {
+  font-size: 13px;
+  color: var(--text-3);
+  text-align: center;
+  padding: 14px 0;
 }
 
 .topbar-actions {

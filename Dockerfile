@@ -16,6 +16,9 @@ RUN npm ci --no-audit --no-fund --registry=https://registry.npmmirror.com
 COPY . .
 ARG VITE_API_BASE=/api
 ENV VITE_API_BASE=${VITE_API_BASE}
+# 生产环境强制走真实后端 API（否则默认会落到 mock 演示数据）
+ARG VITE_USE_MOCK=false
+ENV VITE_USE_MOCK=${VITE_USE_MOCK}
 RUN npm run build
 
 # ---- 阶段 2：运行时 ----
