@@ -12,7 +12,9 @@
     </div>
 
     <ul class="rc-tasks">
-      <li v-for="(task, i) in report.tasks" :key="i">{{ task }}</li>
+      <li v-for="(task, i) in report.tasks" :key="i">
+        <MarkdownView :content="task" inline />
+      </li>
     </ul>
 
     <!-- 关联问题入口（当天有独立记录的问题时显示） -->
@@ -37,6 +39,7 @@ import { useRouter } from 'vue-router'
 import { useReportStore } from '@/stores/reports'
 import { useUiStore } from '@/stores/ui'
 import { useAuthStore } from '@/stores/auth'
+import MarkdownView from '@/components/MarkdownView.vue'
 import { toast } from '@/utils/toast'
 import { tagClassMap } from '@/mock/demoData'
 

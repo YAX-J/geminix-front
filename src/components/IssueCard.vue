@@ -8,7 +8,7 @@
       <span class="tag" :class="tagClassMap[issue.tag] || 'tag-backend'">{{ issue.tag }}</span>
     </div>
 
-    <p class="issue-desc">{{ issue.desc }}</p>
+    <MarkdownView class="issue-desc" :content="issue.desc" />
 
     <!-- 解决方案：最佳高亮，其余折叠 -->
     <div v-if="solutionList.length" class="issue-solutions">
@@ -19,7 +19,7 @@
         :class="{ best: s.best }"
       >
         <span v-if="s.best" class="best-badge">⭐ 最佳方案</span>
-        <span class="solution-text">{{ s.content }}</span>
+        <MarkdownView class="solution-text" :content="s.content" inline />
       </div>
       <div v-if="hiddenCount > 0" class="more-toggle" @click="expanded = !expanded">
         {{ expanded ? '收起方案 ▲' : `还有 ${hiddenCount} 个方案 ▼` }}
@@ -48,6 +48,7 @@ import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useIssueStore } from '@/stores/issues'
 import { useAuthStore } from '@/stores/auth'
+import MarkdownView from '@/components/MarkdownView.vue'
 import { toast } from '@/utils/toast'
 import { tagClassMap } from '@/mock/demoData'
 
