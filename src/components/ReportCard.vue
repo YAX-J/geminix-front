@@ -25,7 +25,7 @@
       >⚠ {{ iss.title }}</span>
     </div>
 
-    <footer class="rc-foot">
+    <footer v-if="auth.canWrite" class="rc-foot">
       <span class="rc-edit" @click="onEdit">编辑</span>
       <span class="rc-edit danger" @click="onDelete">删除</span>
     </footer>
@@ -36,6 +36,7 @@
 import { useRouter } from 'vue-router'
 import { useReportStore } from '@/stores/reports'
 import { useUiStore } from '@/stores/ui'
+import { useAuthStore } from '@/stores/auth'
 import { toast } from '@/utils/toast'
 import { tagClassMap } from '@/mock/demoData'
 
@@ -47,6 +48,7 @@ const props = defineProps({
 const router = useRouter()
 const reportStore = useReportStore()
 const ui = useUiStore()
+const auth = useAuthStore()
 
 function gotoIssue(id) {
   router.push({ path: '/issues', query: { focus: id } })

@@ -31,7 +31,7 @@
       <span v-if="issue.reportDate" class="link" @click="gotoReport(issue.reportDate)">关联日报 {{ issue.reportDate.slice(5) }} ›</span>
       <span v-else class="orphan">独立问题 · 未关联日报</span>
 
-      <span class="ops">
+      <span v-if="auth.canWrite" class="ops">
         <button class="op-btn fav" :class="{ on: issue.favorite }" @click="onFavorite">
           {{ issue.favorite ? '★ 已收藏' : '☆ 收藏' }}
         </button>
@@ -47,6 +47,7 @@
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useIssueStore } from '@/stores/issues'
+import { useAuthStore } from '@/stores/auth'
 import { toast } from '@/utils/toast'
 import { tagClassMap } from '@/mock/demoData'
 
@@ -56,6 +57,7 @@ const props = defineProps({
 
 const router = useRouter()
 const issueStore = useIssueStore()
+const auth = useAuthStore()
 const expanded = ref(false)
 
 /** 兼容旧数据：solutions 为空但有 solution 时，构造单条最佳方案 */
