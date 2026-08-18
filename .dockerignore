@@ -8,7 +8,6 @@ dist_old_*/
 .workbuddy/
 Dockerfile
 .dockerignore
-nginx.conf
 .env.local
 .env.*.local
 npm-debug.log*

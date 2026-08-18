@@ -9,8 +9,8 @@ WORKDIR /build
 
 # 先拷贝 package.json 装依赖（利用缓存：源码变更不重装）
 COPY package.json package-lock.json ./
-# 国内服务器可加 --registry=https://registry.npmmirror.com
-RUN npm ci --no-audit --no-fund
+# 国内服务器走 npmmirror 加速
+RUN npm ci --no-audit --no-fund --registry=https://registry.npmmirror.com
 
 # 拷贝源码并构建
 COPY . .
