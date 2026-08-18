@@ -47,7 +47,7 @@ const html = computed(() => {
   word-break: break-word;
 }
 .md-view p {
-  margin: 0 0 8px;
+  margin: 0 0 4px;
 }
 .md-view p:last-child {
   margin-bottom: 0;

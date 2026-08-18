@@ -19,7 +19,7 @@
         :class="{ best: s.best }"
       >
         <span v-if="s.best" class="best-badge">⭐ 最佳方案</span>
-        <MarkdownView class="solution-text" :content="s.content" inline />
+        <MarkdownView class="solution-text" :content="s.content" />
       </div>
       <div v-if="hiddenCount > 0" class="more-toggle" @click="expanded = !expanded">
         {{ expanded ? '收起方案 ▲' : `还有 ${hiddenCount} 个方案 ▼` }}

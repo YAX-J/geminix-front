@@ -13,7 +13,7 @@
 
     <ul class="rc-tasks">
       <li v-for="(task, i) in report.tasks" :key="i">
-        <MarkdownView :content="task" inline />
+        <MarkdownView :content="task" />
       </li>
     </ul>
 
