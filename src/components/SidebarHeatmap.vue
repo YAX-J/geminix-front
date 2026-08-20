@@ -42,6 +42,18 @@
         @click="ui.reportFilter = f.value"
       >{{ f.label }}</span>
     </div>
+
+    <div class="divider"></div>
+    <div class="panel-title">项目筛选</div>
+    <div class="tag-list">
+      <span
+        v-for="p in projects"
+        :key="p.value"
+        class="tag-chip"
+        :class="{ active: ui.reportProjectFilter === p.value }"
+        @click="setProject(p.value)"
+      >{{ p.label }}</span>
+    </div>
   </aside>
 </template>
 
@@ -71,6 +83,22 @@ const filters = computed(() => [
   { label: '全部', value: 'all' },
   ...tagStore.names.map((n) => ({ label: n, value: n }))
 ])
+
+/* 项目筛选：日报 + 问题收集去重 */
+const projects = computed(() => {
+  const set = new Set()
+  reportStore.items.forEach((r) => r.project && set.add(r.project))
+  issueStore.items.forEach((i) => i.project && set.add(i.project))
+  return [
+    { label: '全部', value: 'all' },
+    ...[...set].sort().map((p) => ({ label: p, value: p }))
+  ]
+})
+
+function setProject(v) {
+  ui.reportProjectFilter = v
+  ui.issueProjectFilter = v
+}
 
 function fmt(d) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`

@@ -37,6 +37,15 @@
             </div>
             <div class="hint">遇到问题请使用「⚠ 记录问题」独立沉淀，日报仅记录工作内容</div>
           </div>
+          <div class="field">
+            <label>项目（可选）</label>
+            <input
+              v-model="form.project"
+              type="text"
+              placeholder="如：ai-recruit / geminix / 企业数字化平台"
+            />
+            <div class="hint">多项目并行时按项目归类，侧栏可按项目筛选</div>
+          </div>
         </div>
         <div class="modal-foot">
           <button class="btn btn-ghost" @click="close">取消</button>
@@ -64,7 +73,7 @@ const tagOptions = computed(() => (tagStore.names.length ? tagStore.names : ['�
 
 onMounted(() => tagStore.load())
 
-const form = reactive({ date: '', time: '', content: '', tags: [] })
+const form = reactive({ date: '', time: '', content: '', tags: [], project: '' })
 
 const isEdit = computed(() => !!ui.reportModalEdit)
 
@@ -79,11 +88,13 @@ watch(
       form.time = edit.time || ''
       form.content = (edit.tasks || []).map((t, i) => `${i + 1}. ${t}`).join('\n')
       form.tags = [...(edit.tags || [])]
+      form.project = edit.project || ''
     } else {
       form.date = ui.reportModalDate || todayStr()
       form.time = ''
       form.content = ''
       form.tags = []
+      form.project = ''
     }
   }
 )
@@ -120,6 +131,7 @@ function save() {
     time: form.time.trim() || '09:00 - 18:00',
     title: tasks[0] || '未命名记录',
     tags: form.tags.length ? [...form.tags] : ['后端'],
+    project: form.project.trim() || '',
     tasks
   }
   if (isEdit.value) {

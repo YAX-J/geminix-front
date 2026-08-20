@@ -3,6 +3,7 @@
     <div class="rc-head">
       <span class="rc-time">{{ report.time }}</span>
       <h3>{{ report.title }}</h3>
+      <span v-if="report.project" class="project-tag" :title="'项目：' + report.project">{{ report.project }}</span>
       <span
         v-for="t in report.tags"
         :key="t"
@@ -12,10 +13,13 @@
     </div>
 
     <ul class="rc-tasks">
-      <li v-for="(task, i) in report.tasks" :key="i">
+      <li v-for="(task, i) in shownTasks" :key="i">
         <MarkdownView :content="task" />
       </li>
     </ul>
+    <button v-if="hasMore" class="rc-toggle" @click="expanded = !expanded">
+      {{ expanded ? '收起' : `展开全部 ${report.tasks.length} 条` }}
+    </button>
 
     <!-- 关联问题入口（当天有独立记录的问题时显示） -->
     <div v-if="linkedIssues.length" class="rc-links">
@@ -35,6 +39,7 @@
 </template>
 
 <script setup>
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useReportStore } from '@/stores/reports'
 import { useUiStore } from '@/stores/ui'
@@ -47,6 +52,14 @@ const props = defineProps({
   report: { type: Object, required: true },
   linkedIssues: { type: Array, default: () => [] }
 })
+
+/* 任务列表折叠：超过 N 条默认只显示前 N 条 */
+const COLLAPSE_LIMIT = 4
+const expanded = ref(false)
+const shownTasks = computed(() =>
+  expanded.value ? props.report.tasks : props.report.tasks.slice(0, COLLAPSE_LIMIT)
+)
+const hasMore = computed(() => props.report.tasks.length > COLLAPSE_LIMIT)
 
 const router = useRouter()
 const reportStore = useReportStore()
@@ -97,6 +110,15 @@ function onDelete() {
   border-radius: 6px;
   font-weight: 600;
 }
+.project-tag {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 6px;
+  color: #7c3aed;
+  background: #f5f3ff;
+  border: 1px solid #ddd6fe;
+}
 .rc-head h3 {
   font-size: 15.5px;
   font-weight: 700;
@@ -127,6 +149,20 @@ function onDelete() {
   background: var(--solution-bg)
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2310b981' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E")
     center / 11px no-repeat;
+}
+
+.rc-toggle {
+  margin-top: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--primary);
+  background: none;
+  border: none;
+  padding: 2px 0;
+  cursor: pointer;
+}
+.rc-toggle:hover {
+  opacity: 0.75;
 }
 
 .rc-links {

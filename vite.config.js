@@ -15,7 +15,7 @@ export default defineConfig({
     // 后端 Spring Boot 默认 8080（IDEA 直接启动即可），开发环境走代理联调
     proxy: {
       '/api': {
-        target: 'http://localhost:8080',
+        target: 'http://localhost:9000',
         changeOrigin: true
       }
     }

@@ -58,10 +58,11 @@ const filtered = computed(() => {
   const kw = ui.searchKw.trim().toLowerCase()
   return issueStore.items
     .filter((i) => {
-      const txt = `${i.title} ${i.desc} ${i.solution || ''} ${i.tag} ${i.createdAt}`.toLowerCase()
+      const txt = `${i.title} ${i.desc} ${i.solution || ''} ${i.tag} ${i.createdAt} ${i.project || ''}`.toLowerCase()
       const kwOk = !kw || txt.includes(kw)
       const stOk = ui.issueFilter === 'all' || i.status === ui.issueFilter
-      return kwOk && stOk
+      const projectOk = ui.issueProjectFilter === 'all' || i.project === ui.issueProjectFilter
+      return kwOk && stOk && projectOk
     })
     .sort((a, b) => {
       // 收藏（常见问题）置顶

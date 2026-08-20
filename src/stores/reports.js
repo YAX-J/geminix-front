@@ -45,7 +45,8 @@ export const useReportStore = defineStore('reports', {
         timeRange: report.time,
         title: report.title,
         tasks: report.tasks,
-        tags: report.tags
+        tags: report.tags,
+        project: report.project || ''
       })
       this.items.unshift({ ...report, id: data.id })
     },
@@ -70,7 +71,8 @@ export const useReportStore = defineStore('reports', {
         timeRange: report.time,
         title: report.title,
         tasks: report.tasks,
-        tags: report.tags
+        tags: report.tags,
+        project: report.project || ''
       })
       const idx = this.items.findIndex((r) => r.id === id)
       if (idx >= 0) this.items[idx] = { ...this.items[idx], ...data, date: data.reportDate }

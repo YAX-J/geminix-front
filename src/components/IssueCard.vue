@@ -5,6 +5,7 @@
       <span v-else class="status-pill open">⏳ 待解决</span>
       <span v-if="issue.favorite" class="fav-pill" title="已收藏（常见问题置顶）">⭐ 收藏</span>
       <h3>{{ issue.title }}</h3>
+      <span v-if="issue.project" class="project-tag">{{ issue.project }}</span>
       <span class="tag" :class="tagClassMap[issue.tag] || 'tag-backend'">{{ issue.tag }}</span>
     </div>
 
@@ -262,5 +263,14 @@ function gotoReport(date) {
 .op-btn.del:hover {
   background: #dc2626;
   color: #fff;
+}
+.project-tag {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 6px;
+  color: #7c3aed;
+  background: #f5f3ff;
+  border: 1px solid #ddd6fe;
 }
 </style>

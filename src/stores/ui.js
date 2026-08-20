@@ -5,12 +5,15 @@ export const useUiStore = defineStore('ui', {
   state: () => ({
     searchKw: '',
     reportFilter: 'all',
+    reportProjectFilter: 'all',
     issueFilter: 'all',
+    issueProjectFilter: 'all',
     reportModalOpen: false,
     reportModalDate: '',
     reportModalEdit: null, // 编辑中的日报对象（null = 新增）
     issueModalOpen: false,
     tagModalOpen: false,
+    importModalOpen: false,
     heatmapTarget: '' // 热力图点击的定位目标日期
   }),
 
@@ -40,6 +43,12 @@ export const useUiStore = defineStore('ui', {
     },
     closeTagModal() {
       this.tagModalOpen = false
+    },
+    openImportModal() {
+      this.importModalOpen = true
+    },
+    closeImportModal() {
+      this.importModalOpen = false
     }
   }
 })

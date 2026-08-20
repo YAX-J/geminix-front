@@ -13,6 +13,7 @@
       <OverviewPanel />
     </div>
     <TagManageModal />
+    <ImportModal />
   </div>
 </template>
 
@@ -22,6 +23,7 @@ import ReminderBanner from '@/components/ReminderBanner.vue'
 import SidebarHeatmap from '@/components/SidebarHeatmap.vue'
 import OverviewPanel from '@/components/OverviewPanel.vue'
 import TagManageModal from '@/components/TagManageModal.vue'
+import ImportModal from '@/components/ImportModal.vue'
 </script>
 
 <style scoped>

@@ -59,6 +59,8 @@
               <label>关联日报日期（可选）</label>
               <input v-model="form.reportDate" type="date" />
               <div class="hint">留空则为独立问题，不依赖日报</div>
+              <label style="margin-top:10px">项目（可选）</label>
+              <input v-model="form.project" type="text" placeholder="如：ai-recruit / geminix" />
             </div>
           </div>
         </div>
@@ -87,7 +89,7 @@ const tagOptions = computed(() => (tagStore.names.length ? tagStore.names : ['�
 
 onMounted(() => tagStore.load())
 
-const form = reactive({ title: '', desc: '', solutions: [], tag: '后端', reportDate: '' })
+const form = reactive({ title: '', desc: '', solutions: [], tag: '后端', reportDate: '', project: '' })
 
 watch(
   () => ui.issueModalOpen,
@@ -98,6 +100,7 @@ watch(
     form.solutions = [{ content: '', best: true }]
     form.tag = '后端'
     form.reportDate = ''
+    form.project = ''
   }
 )
 
@@ -139,7 +142,8 @@ function save() {
     status: hasSolution ? 'done' : 'open',
     favorite: false,
     createdAt: today,
-    reportDate: form.reportDate
+    reportDate: form.reportDate,
+    project: form.project.trim() || ''
   })
   close()
   toast(hasSolution ? '问题已解决并存档 ✔' : '问题已记录，待解决 ⏳')

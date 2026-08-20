@@ -51,6 +51,13 @@
     </div>
 
     <div class="topbar-actions">
+      <button v-if="auth.canWrite" class="btn btn-ghost" @click="ui.openImportModal()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 21V9m0 0-4 4m4-4 4 4" />
+          <path d="M4 5h16" />
+        </svg>
+        导入
+      </button>
       <div class="export-drop">
         <button class="btn btn-ghost" @click="exportOpen = !exportOpen">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -70,6 +77,7 @@
       <button v-if="auth.isAdmin" class="btn btn-ghost" @click="ui.openTagModal()">🏷 标签</button>
       <button v-if="auth.canWrite" class="btn btn-problem" @click="ui.openIssueModal()">⚠ 记录问题</button>
       <button v-if="auth.canWrite" class="btn btn-primary" @click="ui.openReportModal()">＋ 记录日报</button>
+      <button class="btn btn-ghost" @click="toggleTheme" :title="isDark ? '切换亮色' : '切换暗色'">{{ isDark ? '☀' : '🌙' }}</button>
       <button v-if="auth.isAdmin" class="btn btn-ghost" @click="router.push('/users')">👥 用户</button>
       <div class="user-box">
         <div class="avatar">{{ avatarText }}</div>
@@ -105,7 +113,14 @@ const searchInput = ref(null)
 const exportOpen = ref(false)
 const searchOpen = ref(false)
 const searchResults = ref({ reports: [], issues: [] })
+const isDark = ref(document.documentElement.dataset.theme === 'dark')
 let searchTimer = null
+
+function toggleTheme() {
+  isDark.value = !isDark.value
+  document.documentElement.dataset.theme = isDark.value ? 'dark' : 'light'
+  localStorage.setItem('worklog_theme', isDark.value ? 'dark' : 'light')
+}
 
 const avatarText = computed(() => (auth.nickname || '用').slice(0, 1))
 
@@ -272,6 +287,7 @@ function onKeydown(e) {
   if (e.key === 'Escape') {
     exportOpen.value = false
     searchOpen.value = false
+    ui.closeImportModal()
   }
 }
 

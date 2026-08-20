@@ -19,6 +19,62 @@
   --radius: 14px;
 }
 
+/* 暗色主题：html[data-theme='dark'] */
+[data-theme='dark'] {
+  --primary: #818cf8;
+  --primary-deep: #6366f1;
+  --primary-bg: #1e1b4b;
+  --problem: #f59e0b;
+  --problem-bg: #451a03;
+  --problem-deep: #fbbf24;
+  --solution: #34d399;
+  --solution-bg: #022c22;
+  --solution-deep: #6ee7b7;
+  --bg: #0f172a;
+  --card: #1e293b;
+  --text: #e2e8f0;
+  --text-2: #94a3b8;
+  --text-3: #64748b;
+  --border: #334155;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 4px 16px rgba(0, 0, 0, 0.35);
+}
+
+/* 暗色下覆盖硬编码亮色背景的通用组件 */
+[data-theme='dark'] .modal,
+[data-theme='dark'] .btn-ghost,
+[data-theme='dark'] .search-box:focus-within,
+[data-theme='dark'] .search-drop,
+[data-theme='dark'] .drop-menu,
+[data-theme='dark'] .field input[type='text'],
+[data-theme='dark'] .field input[type='date'],
+[data-theme='dark'] .field textarea,
+[data-theme='dark'] .field input:focus,
+[data-theme='dark'] .field textarea:focus,
+[data-theme='dark'] .kbd,
+[data-theme='dark'] .rename-input:focus {
+  background: var(--card);
+}
+[data-theme='dark'] .overlay {
+  background: rgba(2, 6, 23, 0.6);
+}
+[data-theme='dark'] .modal {
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+}
+[data-theme='dark'] .tag-chip,
+[data-theme='dark'] .add-row input,
+[data-theme='dark'] .tag-admin-row,
+[data-theme='dark'] .opt-row input,
+[data-theme='dark'] .opt-select {
+  background: var(--bg);
+}
+[data-theme='dark'] ::-webkit-scrollbar-thumb {
+  background: #334155;
+}
+[data-theme='dark'] .toast {
+  background: #334155;
+  color: #f1f5f9;
+}
+
 * {
   margin: 0;
   padding: 0;

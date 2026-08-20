@@ -22,7 +22,7 @@
         class="day-group"
         :class="{ flash: ui.heatmapTarget === g.date }"
       >
-        <header class="day-head">
+        <header class="day-head" :class="{ collapsed: !isExpanded(g.date) }" @click="toggleDay(g.date)">
           <div class="day-cal">
             <span class="d">{{ parseInt(g.date.slice(8), 10) }}</span>
             <span class="m">{{ parseInt(g.date.slice(5, 7), 10) }}月</span>
@@ -34,17 +34,20 @@
             </div>
             <div class="desc">{{ g.items.length }} 条工作 · {{ linkedCount(g) }} 个关联问题</div>
           </div>
+          <span class="fold-caret">{{ isExpanded(g.date) ? '收起 ▴' : '展开 ▾' }}</span>
           <div class="day-actions">
-            <button class="btn btn-ghost small" @click="ui.openReportModal(g.date)">＋ 补记</button>
+            <button class="btn btn-ghost small" @click.stop="ui.openReportModal(g.date)">＋ 补记</button>
           </div>
         </header>
 
-        <ReportCard
-          v-for="rep in g.items"
-          :key="rep.id"
-          :report="rep"
-          :linked-issues="issueStore.byDate(rep.date)"
-        />
+        <div v-show="isExpanded(g.date)" class="day-body">
+          <ReportCard
+            v-for="rep in g.items"
+            :key="rep.id"
+            :report="rep"
+            :linked-issues="issueStore.byDate(rep.date)"
+          />
+        </div>
       </section>
 
       <div v-if="!filteredGroups.length" class="empty-hint">未找到匹配的日报，换个关键词试试～</div>
@@ -53,7 +56,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, watch, nextTick } from 'vue'
+import { computed, ref, onMounted, watch, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 import { useReportStore } from '@/stores/reports'
 import { useIssueStore } from '@/stores/issues'
@@ -65,14 +68,15 @@ const reportStore = useReportStore()
 const issueStore = useIssueStore()
 const ui = useUiStore()
 
-/* 搜索 + 标签过滤 */
+/* 搜索 + 标签过滤 + 项目过滤 */
 const filtered = computed(() => {
   const kw = ui.searchKw.trim().toLowerCase()
   return reportStore.items.filter((r) => {
-    const txt = `${r.title} ${r.date} ${r.week} ${r.tasks.join(' ')} ${r.tags.join(' ')}`.toLowerCase()
+    const txt = `${r.title} ${r.date} ${r.week} ${r.tasks.join(' ')} ${r.tags.join(' ')} ${r.project || ''}`.toLowerCase()
     const kwOk = !kw || txt.includes(kw)
     const tagOk = ui.reportFilter === 'all' || r.tags.includes(ui.reportFilter)
-    return kwOk && tagOk
+    const projectOk = ui.reportProjectFilter === 'all' || r.project === ui.reportProjectFilter
+    return kwOk && tagOk && projectOk
   })
 })
 
@@ -92,11 +96,44 @@ function linkedCount(g) {
   return issueStore.byDate(g.date).length
 }
 
+/* 日期分组折叠：默认展开最近 N 天，更早的折叠成摘要，点日期头切换 */
+const EXPAND_RECENT_DAYS = 2
+const expandedDays = ref(new Set())
+
+watch(
+  filteredGroups,
+  (groups) => {
+    const s = new Set()
+    groups.slice(0, EXPAND_RECENT_DAYS).forEach((g) => s.add(g.date))
+    expandedDays.value = s
+  },
+  { immediate: true }
+)
+
+function isExpanded(date) {
+  return expandedDays.value.has(date)
+}
+
+function toggleDay(date) {
+  const s = new Set(expandedDays.value)
+  if (s.has(date)) s.delete(date)
+  else s.add(date)
+  expandedDays.value = s
+}
+
+function expandDay(date) {
+  if (expandedDays.value.has(date)) return
+  const s = new Set(expandedDays.value)
+  s.add(date)
+  expandedDays.value = s
+}
+
 /* 热力图点击定位 */
 watch(
   () => ui.heatmapTarget,
   async (target) => {
     if (!target) return
+    expandDay(target)
     await nextTick()
     const el = document.getElementById('day-' + target.replace(/-/g, ''))
     if (!el) return
@@ -112,6 +149,7 @@ watch(
   () => route.query.date,
   async (date) => {
     if (!date) return
+    expandDay(String(date))
     await nextTick()
     const el = document.getElementById('day-' + String(date).replace(/-/g, ''))
     if (!el) return
@@ -207,6 +245,13 @@ onMounted(async () => {
   padding: 12px 4px;
   border-radius: 12px;
   margin-bottom: 12px;
+  cursor: pointer;
+}
+.day-head.collapsed {
+  margin-bottom: 8px;
+}
+.day-meta {
+  flex: 1;
 }
 .day-cal {
   width: 46px;
@@ -249,8 +294,14 @@ onMounted(async () => {
   border-radius: 999px;
   margin-left: 8px;
 }
+.fold-caret {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-2);
+  white-space: nowrap;
+}
 .day-actions {
-  margin-left: auto;
+  flex-shrink: 0;
 }
 .btn.small {
   padding: 6px 12px;
